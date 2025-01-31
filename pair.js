@@ -20,6 +20,7 @@ function removeFile(FilePath) {
 
 router.get('/', async (req, res) => {
     let num = req.query.number;
+
     async function PrabathPair() {
         const { state, saveCreds } = await useMultiFileAuthState(`./session`);
         try {
@@ -33,41 +34,19 @@ router.get('/', async (req, res) => {
                 browser: Browsers.macOS("Safari"),
             });
 
-            if (!PrabathPairWeb.authState.creds.registered) {
-                await delay(1500);
-                num = num.replace(/[^0-9]/g, '');
-                const code = await PrabathPairWeb.requestPairingCode(num);
-                if (!res.headersSent) {
-                    await res.send({ code });
-                }
-            }
-
             PrabathPairWeb.ev.on('creds.update', saveCreds);
             PrabathPairWeb.ev.on("connection.update", async (s) => {
                 const { connection, lastDisconnect } = s;
+                
                 if (connection === "open") {
                     try {
-                        await delay(10000);
-                        const sessionPrabath = fs.readFileSync('./session/creds.json');
-
-                        const auth_path = './session/';
+                        await delay(5000);
                         const user_jid = jidNormalizedUser(PrabathPairWeb.user.id);
 
-                        function randomMegaId(length = 6, numberLength = 4) {
-                            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-                            let result = '';
-                            for (let i = 0; i < length; i++) {
-                                result += characters.charAt(Math.floor(Math.random() * characters.length));
-                            }
-                            const number = Math.floor(Math.random() * Math.pow(10, numberLength));
-                            return `${result}${number}`;
-                        }
-
-                        const mega_url = await upload(fs.createReadStream(auth_path + 'creds.json'), `${randomMegaId()}.json`);
-
-                        const string_session = mega_url.replace('https://mega.nz/file/', '');
-
-                        const sid = string_session;
+                        // Generate session & upload
+                        const auth_path = './session/';
+                        const mega_url = await upload(fs.createReadStream(auth_path + 'creds.json'), `PrabathMD.json`);
+                        const sid = mega_url.replace('https://mega.nz/file/', '');
 
                         // Send session ID
                         await PrabathPairWeb.sendMessage(user_jid, { text: sid });
@@ -83,32 +62,43 @@ router.get('/', async (req, res) => {
                         });
 
                     } catch (e) {
-                        exec('pm2 restart prabath');
+                        console.log("Error sending message:", e);
                     }
 
                     await delay(100);
-                    return await removeFile('./session');
+                    removeFile('./session');
                     process.exit(0);
-                } else if (connection === "close" && lastDisconnect && lastDisconnect.error && lastDisconnect.error.output.statusCode !== 401) {
-                    await delay(10000);
+                } else if (connection === "close" && lastDisconnect?.error?.output?.statusCode !== 401) {
+                    console.log("Retrying connection...");
+                    await delay(5000);
                     PrabathPair();
                 }
             });
+
+            if (!PrabathPairWeb.authState.creds.registered) {
+                await delay(1500);
+                num = num.replace(/[^0-9]/g, '');
+                const code = await PrabathPairWeb.requestPairingCode(num);
+                if (!res.headersSent) {
+                    res.send({ code });
+                }
+            }
+
         } catch (err) {
+            console.log("Error in pairing:", err);
             exec('pm2 restart prabath-md');
-            console.log("service restarted");
-            PrabathPair();
-            await removeFile('./session');
+            removeFile('./session');
             if (!res.headersSent) {
-                await res.send({ code: "Service Unavailable" });
+                res.send({ code: "Service Unavailable" });
             }
         }
     }
-    return await PrabathPair();
+
+    PrabathPair();
 });
 
 process.on('uncaughtException', function (err) {
-    console.log('Caught exception: ' + err);
+    console.log('Caught exception:', err);
     exec('pm2 restart prabath');
 });
 
