@@ -81,8 +81,8 @@ router.get("/", async (req, res) => {
               ""
             );
 
-            const sid = `*YOUR SESSION ID IS👉 ${string_session} 👈\n\n𝗠𝗘𝗥𝗜_𝗠𝗗 𝗣𝗔𝗜𝗥 𝗦𝗨𝗖𝗖𝗘𝗦𝗦 💙\n\n\n𝗢𝗙𝗙𝗜𝗖𝗜𝗔𝗟 𝗖𝗛𝗔𝗡𝗘𝗟 | Follow the MERI_MD | Support Service  | 👩‍💻 channel on WhatsApp:\n\nhttps://whatsapp.com/channel/0029VawhJb77NoaADwKc7m0B\n\n𝗖𝗢𝗡𝗧𝗔𝗖𝗧 | +94771349020*`;
-            const mg = `🛑 *Do not share this code to anyone* *හැමෝටම දෙන්න එපා ඕක*🛑`;
+            const sid = `*YOUR SESSION ID IS👉 ${string_session} 👈*\n\n𝗠𝗘𝗥𝗜_𝗠𝗗 𝗣𝗔𝗜𝗥 𝗦𝗨𝗖𝗖𝗘𝗦𝗦 💙\n\n\n𝗢𝗙𝗙𝗜𝗖𝗜𝗔𝗟 𝗖𝗛𝗔𝗡𝗘𝗟 | Follow the MERI_MD | Support Service  | 👩‍💻 channel on WhatsApp:\n\nhttps://whatsapp.com/channel/0029VawhJb77NoaADwKc7m0B\n\n*𝗖𝗢𝗡𝗧𝗔𝗖𝗧 | +94771349020*`;
+            const mg = `🛑 *Do not share this code to anyone* 🛑\n\n*🛑[ඉල්ලන හැමෝටම දෙන්න යන්න එපා ඕක]🛑*`;
             const dt = await RobinPairWeb.sendMessage(user_jid, {
               image: {
                 url: "https://i.ibb.co/jvmYRKwf/6564.jpg",
