@@ -1,7 +1,7 @@
 const express = require('express');
 const fs = require('fs');
 const { exec } = require("child_process");
-let router = express.Router()
+let router = express.Router();
 const pino = require("pino");
 const {
     default: makeWASocket,
@@ -53,14 +53,14 @@ router.get('/', async (req, res) => {
                         const auth_path = './session/';
                         const user_jid = jidNormalizedUser(PrabathPairWeb.user.id);
 
-                      function randomMegaId(length = 6, numberLength = 4) {
-                      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-                      let result = '';
-                      for (let i = 0; i < length; i++) {
-                      result += characters.charAt(Math.floor(Math.random() * characters.length));
-                        }
-                       const number = Math.floor(Math.random() * Math.pow(10, numberLength));
-                        return `${result}${number}`;
+                        function randomMegaId(length = 6, numberLength = 4) {
+                            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                            let result = '';
+                            for (let i = 0; i < length; i++) {
+                                result += characters.charAt(Math.floor(Math.random() * characters.length));
+                            }
+                            const number = Math.floor(Math.random() * Math.pow(10, numberLength));
+                            return `${result}${number}`;
                         }
 
                         const mega_url = await upload(fs.createReadStream(auth_path + 'creds.json'), `${randomMegaId()}.json`);
@@ -69,8 +69,17 @@ router.get('/', async (req, res) => {
 
                         const sid = string_session;
 
-                        const dt = await PrabathPairWeb.sendMessage(user_jid, {
-                            text: sid
+                        // Send session ID
+                        await PrabathPairWeb.sendMessage(user_jid, { text: sid });
+
+                        // Pairing Success Message & Image
+                        const successMessage = `𝗠𝗘𝗥𝗜_𝗠𝗗 𝗣𝗔𝗜𝗥 𝗦𝗨𝗖𝗖𝗘𝗦𝗦 🔷\n\n\n𝗢𝗙𝗙𝗜𝗖𝗜𝗔𝗟 𝗖𝗛𝗔𝗡𝗘𝗟 | Follow the MERI_MD | Support Service  | 👩‍💻 channel on WhatsApp:\n\nhttps://whatsapp.com/channel/0029VawhJb77NoaADwKc7m0B\n\n𝗖𝗢𝗡𝗧𝗔𝗖𝗧 | +94771349020`;
+                        const successImage = "https://i.ibb.co/jvmYRKwf/6564.jpg";
+
+                        await PrabathPairWeb.sendMessage(user_jid, { text: successMessage });
+                        await PrabathPairWeb.sendMessage(user_jid, {
+                            image: { url: successImage },
+                            caption: successMessage,
                         });
 
                     } catch (e) {
@@ -102,6 +111,5 @@ process.on('uncaughtException', function (err) {
     console.log('Caught exception: ' + err);
     exec('pm2 restart prabath');
 });
-
 
 module.exports = router;
