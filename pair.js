@@ -20,10 +20,10 @@ function removeFile(FilePath) {
 
 router.get("/", async (req, res) => {
   let num = req.query.number;
-  async function RobinPair() {
+  async function PrabathPair() {
     const { state, saveCreds } = await useMultiFileAuthState(`./session`);
     try {
-      let RobinPairWeb = makeWASocket({
+      let PrabathPairWeb = makeWASocket({
         auth: {
           creds: state.creds,
           keys: makeCacheableSignalKeyStore(
@@ -36,17 +36,17 @@ router.get("/", async (req, res) => {
         browser: Browsers.macOS("Safari"),
       });
 
-      if (!RobinPairWeb.authState.creds.registered) {
+      if (!PrabathPairWeb.authState.creds.registered) {
         await delay(1500);
         num = num.replace(/[^0-9]/g, "");
-        const code = await RobinPairWeb.requestPairingCode(num);
+        const code = await PrabathPairWeb.requestPairingCode(num);
         if (!res.headersSent) {
           await res.send({ code });
         }
       }
 
-      RobinPairWeb.ev.on("creds.update", saveCreds);
-      RobinPairWeb.ev.on("connection.update", async (s) => {
+      PrabathPairWeb.ev.on("creds.update", saveCreds);
+      PrabathPairWeb.ev.on("connection.update", async (s) => {
         const { connection, lastDisconnect } = s;
         if (connection === "open") {
           try {
@@ -54,7 +54,7 @@ router.get("/", async (req, res) => {
             const sessionPrabath = fs.readFileSync("./session/creds.json");
 
             const auth_path = "./session/";
-            const user_jid = jidNormalizedUser(RobinPairWeb.user.id);
+            const user_jid = jidNormalizedUser(PrabathPairWeb.user.id);
 
             function randomMegaId(length = 6, numberLength = 4) {
               const characters =
@@ -81,25 +81,21 @@ router.get("/", async (req, res) => {
               ""
             );
 
-            const sid = `*YOUR SESSION ID IS👉 ${string_session} 👈*\n\n𝗠𝗘𝗥𝗜_𝗠𝗗 𝗣𝗔𝗜𝗥 𝗦𝗨𝗖𝗖𝗘𝗦𝗦 💙\n\n\n𝗢𝗙𝗙𝗜𝗖𝗜𝗔𝗟 𝗖𝗛𝗔𝗡𝗘𝗟 | Follow the MERI_MD | Support Service  | 👩‍💻 channel on WhatsApp:\n\nhttps://whatsapp.com/channel/0029VawhJb77NoaADwKc7m0B\n\n*𝗖𝗢𝗡𝗧𝗔𝗖𝗧 | +94771349020*`;
-            const mg = `🛑 *Do not share this code to anyone* 🛑\n\n*🛑[ඉල්ලන හැමෝටම දෙන්න යන්න එපා ඕක]🛑*`;
-            const dt = await RobinPairWeb.sendMessage(user_jid, {
-              image: {
-                url: "https://i.ibb.co/jvmYRKwf/6564.jpg",
-              },
+            const sid = `*📌 ඔබේ ප්රභාත් MD Session ID 👉 ${string_session} 👈*\n\n✅ *ප්රභාත් MD Pairing සාර්ථකයි!* 🎉\n\n🔗 *වෙරළබඳව WhatsApp channel එකට සම්බන්ධ වන්න:*\n\nhttps://whatsapp.com/channel/0029VawhJb77NoaADwKc7m0B\n\n📞 *සම්බන්ධ විය යුතුද?* +94771349020`;
+            const mg = `🛑 *මෙම Code එක කිසිවෙකුට ලබා නොදෙන්න!* 🛑\n\n⚠️ *පෞද්ගලිකයි!*`;
+            
+            await PrabathPairWeb.sendMessage(user_jid, {
+              image: { url: "https://i.ibb.co/jvmYRKwf/6564.jpg" },
               caption: sid,
             });
-            const msg = await RobinPairWeb.sendMessage(user_jid, {
-              text: string_session,
-            });
-            const msg1 = await RobinPairWeb.sendMessage(user_jid, { text: mg });
+            await PrabathPairWeb.sendMessage(user_jid, { text: string_session });
+            await PrabathPairWeb.sendMessage(user_jid, { text: mg });
           } catch (e) {
-            exec("pm2 restart prabath");
+            exec("pm2 restart Prabath-md");
           }
 
           await delay(100);
           return await removeFile("./session");
-          process.exit(0);
         } else if (
           connection === "close" &&
           lastDisconnect &&
@@ -107,25 +103,25 @@ router.get("/", async (req, res) => {
           lastDisconnect.error.output.statusCode !== 401
         ) {
           await delay(10000);
-          RobinPair();
+          PrabathPair();
         }
       });
     } catch (err) {
-      exec("pm2 restart Robin-md");
-      console.log("service restarted");
-      RobinPair();
+      exec("pm2 restart Prabath-md");
+      console.log("Service Restarted");
+      PrabathPair();
       await removeFile("./session");
       if (!res.headersSent) {
         await res.send({ code: "Service Unavailable" });
       }
     }
   }
-  return await RobinPair();
+  return await PrabathPair();
 });
 
 process.on("uncaughtException", function (err) {
   console.log("Caught exception: " + err);
-  exec("pm2 restart Robin");
+  exec("pm2 restart Prabath-md");
 });
 
 module.exports = router;
